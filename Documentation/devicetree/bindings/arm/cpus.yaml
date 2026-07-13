@@ -90,9 +90,11 @@ properties:
           - apple,firestorm
           - apple,hurricane-zephyr
           - apple,icestorm
+          - apple,lightning
           - apple,mistral
           - apple,monsoon
           - apple,sawtooth
+          - apple,thunder
           - apple,twister
           - apple,typhoon
           - arm,arm710t

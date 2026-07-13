@@ -49,6 +49,7 @@ properties:
           - apple,s8000-aic
           - apple,t8010-aic
           - apple,t8015-aic
+          - apple,t8030-aic
           - apple,t8103-aic
       - const: apple,aic
 

@@ -155,6 +155,7 @@ static int __init apple_cpuidle_init(void)
 	      of_machine_is_compatible("apple,t6020") ||
 	      of_machine_is_compatible("apple,t6021") ||
 	      of_machine_is_compatible("apple,t6022") ||
+	      of_machine_is_compatible("apple,t8030") ||
 	      of_machine_is_compatible("apple,t6030") ||
 	      of_machine_is_compatible("apple,t6031") ||
 	      of_machine_is_compatible("apple,t6032") ||

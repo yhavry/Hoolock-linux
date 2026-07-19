@@ -13,6 +13,8 @@
 #include <linux/mutex.h>
 #include <linux/platform_device.h>
 #include <linux/reset.h>
+#include <linux/usb/ch9.h>
+#include <linux/usb/otg.h>
 
 #include "glue.h"
 
@@ -168,6 +170,12 @@ static void dwc3_apple_set_ptrcap(struct dwc3_apple *appledwc, u32 mode)
 	dwc3_set_prtcap(&appledwc->dwc, mode, false);
 }
 
+static bool dwc3_apple_has_usb3(struct dwc3_apple *appledwc)
+{
+	return appledwc->dwc.maximum_speed == USB_SPEED_UNKNOWN ||
+	       appledwc->dwc.maximum_speed >= USB_SPEED_SUPER;
+}
+
 static int dwc3_apple_core_probe(struct dwc3_apple *appledwc)
 {
 	struct dwc3_probe_data probe_data = {};
@@ -257,7 +265,8 @@ static int dwc3_apple_init(struct dwc3_apple *appledwc, enum dwc3_apple_state st
 	 * Now that the core is initialized and already went through dwc3_core_soft_reset we can
 	 * configure some unknown Apple-specific settings and then bring up xhci or gadget mode.
 	 */
-	dwc3_apple_setup_cio(appledwc);
+	if (dwc3_apple_has_usb3(appledwc))
+		dwc3_apple_setup_cio(appledwc);
 
 	switch (state) {
 	case DWC3_APPLE_HOST:
@@ -285,8 +294,11 @@ static int dwc3_apple_init(struct dwc3_apple *appledwc, enum dwc3_apple_state st
 		 * configure the PHY and switch dwc3's PIPE interface to USB3 PHY. The USB2 PHY
 		 * has already been configured to the correct mode earlier.
 		 */
-		dwc3_enable_susphy(&appledwc->dwc, true);
-		phy_set_mode(appledwc->dwc.usb3_generic_phy[0], PHY_MODE_USB_DEVICE);
+		if (dwc3_apple_has_usb3(appledwc)) {
+			dwc3_enable_susphy(&appledwc->dwc, true);
+			phy_set_mode(appledwc->dwc.usb3_generic_phy[0],
+				     PHY_MODE_USB_DEVICE);
+		}
 		ret = dwc3_gadget_init(&appledwc->dwc);
 		if (ret) {
 			dev_err(appledwc->dev, "Failed to initialize gadget, ret=%d\n", ret);
@@ -337,7 +349,8 @@ static int dwc3_apple_exit(struct dwc3_apple *appledwc)
 	 * and switch dwc3's PIPE interface back to a dummy PHY (i.e. no USB3 support and USB2 via
 	 * a different PHY connected through ULPI).
 	 */
-	dwc3_enable_susphy(&appledwc->dwc, true);
+	if (dwc3_apple_has_usb3(appledwc))
+		dwc3_enable_susphy(&appledwc->dwc, true);
 	dwc3_core_exit(&appledwc->dwc);
 	appledwc->state = DWC3_APPLE_NO_CABLE;
 
@@ -436,6 +449,7 @@ static int dwc3_apple_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct dwc3_apple *appledwc;
+	enum usb_dr_mode dr_mode;
 	int ret;
 
 	appledwc = devm_kzalloc(&pdev->dev, sizeof(*appledwc), GFP_KERNEL);
@@ -444,6 +458,7 @@ static int dwc3_apple_probe(struct platform_device *pdev)
 
 	appledwc->dev = &pdev->dev;
 	mutex_init(&appledwc->lock);
+	dr_mode = usb_get_dr_mode(dev);
 
 	appledwc->reset = devm_reset_control_get_exclusive(dev, NULL);
 	if (IS_ERR(appledwc->reset))
@@ -467,6 +482,25 @@ static int dwc3_apple_probe(struct platform_device *pdev)
 		return dev_err_probe(dev, PTR_ERR(appledwc->apple_regs),
 				     "Failed to map Apple-specific MMIO\n");
 
+	if (dr_mode == USB_DR_MODE_PERIPHERAL) {
+		appledwc->state = DWC3_APPLE_PROBE_PENDING;
+
+		{
+			guard(mutex)(&appledwc->lock);
+
+			ret = dwc3_apple_init(appledwc, DWC3_APPLE_DEVICE);
+		}
+		if (ret) {
+			if (appledwc->state != DWC3_APPLE_PROBE_PENDING)
+				dwc3_core_remove(&appledwc->dwc);
+
+			return dev_err_probe(dev, ret,
+					     "Failed to initialize peripheral mode\n");
+		}
+
+		return 0;
+	}
+
 	/*
 	 * On this platform, DWC3 can only be brought up after parts of the PHY have been
 	 * initialized with knowledge of the target mode and cable orientation from typec_set_mux.
@@ -489,7 +523,8 @@ static void dwc3_apple_remove(struct platform_device *pdev)
 
 	guard(mutex)(&appledwc->lock);
 
-	usb_role_switch_unregister(appledwc->role_sw);
+	if (appledwc->role_sw)
+		usb_role_switch_unregister(appledwc->role_sw);
 
 	/*
 	 * If we're still in DWC3_APPLE_PROBE_PENDING we never got any cable connected event and

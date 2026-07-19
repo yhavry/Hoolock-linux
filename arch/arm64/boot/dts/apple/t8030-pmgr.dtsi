@@ -1,0 +1,47 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Apple T8030 USB power domains
+ *
+ * Copyright The Asahi Linux Contributors
+ */
+
+&pmgr {
+	ps_usb: power-controller@802e8 {
+		compatible = "apple,t8030-pmgr-pwrstate",
+			     "apple,t8103-pmgr-pwrstate";
+		reg = <0x802e8 4>;
+		#power-domain-cells = <0>;
+		#reset-cells = <0>;
+		label = "usb";
+	};
+
+	ps_usbctl: power-controller@802f0 {
+		compatible = "apple,t8030-pmgr-pwrstate",
+			     "apple,t8103-pmgr-pwrstate";
+		reg = <0x802f0 4>;
+		#power-domain-cells = <0>;
+		#reset-cells = <0>;
+		label = "usbctl";
+		power-domains = <&ps_usb>;
+	};
+
+	ps_usb2dev: power-controller@802f8 {
+		compatible = "apple,t8030-pmgr-pwrstate",
+			     "apple,t8103-pmgr-pwrstate";
+		reg = <0x802f8 4>;
+		#power-domain-cells = <0>;
+		#reset-cells = <0>;
+		label = "usb2dev";
+		power-domains = <&ps_usb>;
+	};
+
+	ps_usb31drd: power-controller@80300 {
+		compatible = "apple,t8030-pmgr-pwrstate",
+			     "apple,t8103-pmgr-pwrstate";
+		reg = <0x80300 4>;
+		#power-domain-cells = <0>;
+		#reset-cells = <0>;
+		label = "usb31drd";
+		power-domains = <&ps_usb>;
+	};
+};

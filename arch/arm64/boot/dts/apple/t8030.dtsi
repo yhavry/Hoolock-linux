@@ -7,6 +7,7 @@
 
 #include <dt-bindings/interrupt-controller/apple-aic.h>
 #include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/phy/phy.h>
 
 / {
 	#address-cells = <2>;
@@ -104,6 +105,14 @@
 		nonposted-mmio;
 		interrupt-parent = <&aic>;
 
+		pmgr: power-management@23b000000 {
+			compatible = "apple,t8030-pmgr", "apple,t8103-pmgr",
+				     "syscon", "simple-mfd";
+			reg = <0x2 0x3b000000 0x0 0x100000>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+		};
+
 		aic: interrupt-controller@23b100000 {
 			compatible = "apple,t8030-aic", "apple,aic";
 			reg = <0x2 0x3b100000 0x0 0x8000>;
@@ -119,5 +128,47 @@
 			clocks = <&clkref>, <&clkref>;
 			clock-names = "uart", "clk_uart_baud0";
 		};
+
+		usb2phy: phy@239000060 {
+			compatible = "apple,t8030-ausb-phy", "apple,ausb-phy";
+			reg = <0x2 0x39000060 0x0 0x20>;
+			#phy-cells = <1>;
+			power-domains = <&ps_usbctl>;
+			status = "disabled";
+		};
+
+		usb_dart0: iommu@239024000 {
+			compatible = "apple,t8103-dart";
+			reg = <0x2 0x39024000 0x0 0x4000>;
+			interrupts = <AIC_IRQ 501 IRQ_TYPE_LEVEL_HIGH>;
+			#iommu-cells = <1>;
+			power-domains = <&ps_usbctl>;
+			status = "disabled";
+		};
+
+		usb_dart1: iommu@239028000 {
+			compatible = "apple,t8103-dart";
+			reg = <0x2 0x39028000 0x0 0x4000>;
+			interrupts = <AIC_IRQ 501 IRQ_TYPE_LEVEL_HIGH>;
+			#iommu-cells = <1>;
+			power-domains = <&ps_usb2dev>;
+			status = "disabled";
+		};
+
+		usb_drd: usb@239010000 {
+			compatible = "apple,t8030-dwc3", "apple,t8103-dwc3";
+			reg = <0x2 0x39010000 0x0 0xcd00>,
+			      <0x2 0x3901cd00 0x0 0x3200>;
+			reg-names = "dwc3-core", "dwc3-apple";
+			interrupts = <AIC_IRQ 497 IRQ_TYPE_LEVEL_HIGH>;
+			iommus = <&usb_dart0 3>, <&usb_dart1 3>;
+			power-domains = <&ps_usb31drd>;
+			resets = <&ps_usb31drd>;
+			phys = <&usb2phy PHY_TYPE_USB2>;
+			phy-names = "usb2-phy";
+			status = "disabled";
+		};
 	};
 };
+
+#include "t8030-pmgr.dtsi"

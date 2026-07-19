@@ -22,3 +22,25 @@
 		};
 	};
 };
+
+&usb2phy {
+	apple,cfg0-device = <0x27373bf3>;
+	apple,cfg1-device = <0x00020c44>;
+	apple,cfg0-host = <0x27373b53>;
+	apple,cfg1-host = <0x00020c44>;
+	status = "okay";
+};
+
+&usb_dart0 {
+	status = "okay";
+};
+
+&usb_dart1 {
+	status = "okay";
+};
+
+&usb_drd {
+	dr_mode = "peripheral";
+	maximum-speed = "high-speed";
+	status = "okay";
+};

@@ -25,6 +25,7 @@ properties:
           - apple,t8010-ausb-phy
           - apple,t8011-ausb-phy
           - apple,t8015-ausb-phy
+          - apple,t8030-ausb-phy
       - const: apple,ausb-phy
 
   reg:

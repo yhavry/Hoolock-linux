@@ -39,7 +39,6 @@ properties:
       The PHY handles muxing between USB 2.0 Host and Device modes.
 
   power-domains:
-    minItems: 1
     maxItems: 1
 
   apple,cfg0-device:
@@ -72,10 +71,15 @@ additionalProperties: false
 
 examples:
   - |
-    phy@20c000060 {
-        compatible = "apple,t8015-ausb-phy", "apple,ausb-phy";
-        reg = <0x2 0x0c000060 0x0 0x20>;
-        #phy-cells = <1>;
-        power-domains = <&ps_usbctlreg>;
-        /* Tunables to be filled by loader */
+    soc {
+        #address-cells = <2>;
+        #size-cells = <2>;
+
+        phy@20c000060 {
+            compatible = "apple,t8015-ausb-phy", "apple,ausb-phy";
+            reg = <0x2 0x0c000060 0x0 0x20>;
+            #phy-cells = <1>;
+            power-domains = <&ps_usbctlreg>;
+            /* Tunables to be filled by loader */
+        };
     };

@@ -308,6 +308,10 @@ static const struct aic_info aic3_info __initconst = {
 
 static const struct of_device_id aic_info_match[] = {
 	{
+		.compatible = "apple,t8030-aic",
+		.data = &aic1_local_fipi_info,
+	},
+	{
 		.compatible = "apple,t8103-aic",
 		.data = &aic1_local_fipi_info,
 	},

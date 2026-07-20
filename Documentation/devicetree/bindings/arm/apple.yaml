@@ -291,6 +291,7 @@ properties:
         items:
           - enum:
               - apple,d421 # iPhone 11 Pro
+              - apple,d79 # iPhone SE (2nd generation)
           - const: apple,t8030
           - const: apple,arm-platform
 

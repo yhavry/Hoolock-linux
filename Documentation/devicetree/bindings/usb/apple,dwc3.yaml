@@ -10,11 +10,30 @@ maintainers:
   - Sven Peter <sven@kernel.org>
 
 description:
-  Apple Silicon SoCs use a Synopsys DesignWare DWC3 based controller for each of
-  their Type-C ports.
+  Apple Silicon SoCs use Synopsys DesignWare DWC3 based controllers for Type-C
+  and fixed-function USB ports.
 
 allOf:
   - $ref: snps,dwc3-common.yaml#
+
+  - if:
+      properties:
+        compatible:
+          contains:
+            const: apple,t8030-dwc3
+    then:
+      properties:
+        dr_mode:
+          const: peripheral
+        maximum-speed:
+          const: high-speed
+        usb-role-switch: false
+      required:
+        - dr_mode
+        - maximum-speed
+    else:
+      required:
+        - usb-role-switch
 
 properties:
   compatible:
@@ -58,15 +77,6 @@ required:
   - iommus
   - resets
   - power-domains
-
-oneOf:
-  - required:
-      - usb-role-switch
-  - properties:
-      dr_mode:
-        const: peripheral
-    required:
-      - dr_mode
 
 unevaluatedProperties: false
 

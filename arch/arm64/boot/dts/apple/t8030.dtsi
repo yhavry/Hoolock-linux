@@ -218,6 +218,34 @@
 			reg = <0x2 0x3b000000 0x0 0x100000>;
 			#address-cells = <1>;
 			#size-cells = <1>;
+
+			ps_apcie: power-controller@80378 {
+				compatible = "apple,t8030-pmgr-pwrstate",
+					     "apple,t8103-pmgr-pwrstate";
+				reg = <0x80378 4>;
+				#power-domain-cells = <0>;
+				#reset-cells = <0>;
+				label = "apcie";
+			};
+
+			ps_ans2: power-controller@80388 {
+				compatible = "apple,t8030-pmgr-pwrstate",
+					     "apple,t8103-pmgr-pwrstate";
+				reg = <0x80388 4>;
+				#power-domain-cells = <0>;
+				#reset-cells = <0>;
+				label = "ans2";
+			};
+
+			ps_apcie_st: power-controller@803b0 {
+				compatible = "apple,t8030-pmgr-pwrstate",
+					     "apple,t8103-pmgr-pwrstate";
+				reg = <0x803b0 4>;
+				#power-domain-cells = <0>;
+				#reset-cells = <0>;
+				label = "apcie_st";
+				power-domains = <&ps_apcie>, <&ps_ans2>;
+			};
 		};
 
 		aic: interrupt-controller@23b100000 {
@@ -426,9 +454,25 @@
 			status = "disabled";
 		};
 
+		ans_mbox: mbox@277408000 {
+			compatible = "apple,t8030-asc-mailbox",
+				     "apple,t8015-asc-mailbox";
+			reg = <0x2 0x77408000 0x0 0x4000>;
+			interrupts = <AIC_IRQ 361 IRQ_TYPE_LEVEL_HIGH>,
+				     <AIC_IRQ 416 IRQ_TYPE_LEVEL_HIGH>,
+				     <AIC_IRQ 418 IRQ_TYPE_LEVEL_HIGH>,
+				     <AIC_IRQ 419 IRQ_TYPE_LEVEL_HIGH>;
+			interrupt-names = "send-empty", "send-not-empty",
+					  "recv-empty", "recv-not-empty";
+			#mbox-cells = <0>;
+			power-domains = <&ps_ans2>;
+			status = "okay";
+		};
+
 		sart: iommu@27ac50000 {
 			compatible = "apple,t8030-sart";
 			reg = <0x2 0x7ac50000 0x0 0x4000>;
+			power-domains = <&ps_ans2>;
 		};
 	};
 };

@@ -37,6 +37,19 @@
 
 #define APPLE_SART0_FLAGS_ALLOW 0xf
 
+/* SARTv1 registers */
+#define APPLE_SART1_CONFIG(idx)       (0x00 + 4 * (idx))
+#define APPLE_SART1_CONFIG_FLAGS      GENMASK(30, 24)
+#define APPLE_SART1_CONFIG_SIZE       GENMASK(18, 2)
+#define APPLE_SART1_CONFIG_SIZE_SHIFT 14
+#define APPLE_SART1_CONFIG_SIZE_MAX   GENMASK(16, 0)
+
+#define APPLE_SART1_PADDR(idx)       (0x40 + 4 * (idx))
+#define APPLE_SART1_PADDR_VALUE      GENMASK(23, 2)
+#define APPLE_SART1_PADDR_SHIFT      14
+
+#define APPLE_SART1_FLAGS_ALLOW 0x6f
+
 /* SARTv2 registers */
 #define APPLE_SART2_CONFIG(idx)	      (0x00 + 4 * (idx))
 #define APPLE_SART2_CONFIG_FLAGS      GENMASK(31, 24)
@@ -114,6 +127,43 @@ static struct apple_sart_ops sart_ops_v0 = {
 	.size_shift = APPLE_SART0_CONFIG_SIZE_SHIFT,
 	.paddr_shift = APPLE_SART0_PADDR_SHIFT,
 	.size_max = APPLE_SART0_CONFIG_SIZE_MAX,
+};
+
+static void sart1_get_entry(struct apple_sart *sart, int index, u8 *flags,
+			    phys_addr_t *paddr, size_t *size)
+{
+	u32 addr = readl(sart->regs + APPLE_SART1_PADDR(index));
+	u32 cfg = readl(sart->regs + APPLE_SART1_CONFIG(index));
+	phys_addr_t paddr_ = FIELD_GET(APPLE_SART1_PADDR_VALUE, addr);
+	size_t size_ = FIELD_GET(APPLE_SART1_CONFIG_SIZE, cfg);
+
+	*flags = FIELD_GET(APPLE_SART1_CONFIG_FLAGS, cfg);
+	*size = size_ << APPLE_SART1_CONFIG_SIZE_SHIFT;
+	*paddr = paddr_ << APPLE_SART1_PADDR_SHIFT;
+}
+
+static void sart1_set_entry(struct apple_sart *sart, int index, u8 flags,
+			    phys_addr_t paddr_shifted, size_t size_shifted)
+{
+	u32 addr;
+	u32 cfg;
+
+	addr = FIELD_PREP(APPLE_SART1_PADDR_VALUE, paddr_shifted);
+
+	cfg = FIELD_PREP(APPLE_SART1_CONFIG_FLAGS, flags);
+	cfg |= FIELD_PREP(APPLE_SART1_CONFIG_SIZE, size_shifted);
+
+	writel(addr, sart->regs + APPLE_SART1_PADDR(index));
+	writel(cfg, sart->regs + APPLE_SART1_CONFIG(index));
+}
+
+static struct apple_sart_ops sart_ops_v1 = {
+	.get_entry = sart1_get_entry,
+	.set_entry = sart1_set_entry,
+	.flags_allow = APPLE_SART1_FLAGS_ALLOW,
+	.size_shift = APPLE_SART1_CONFIG_SIZE_SHIFT,
+	.paddr_shift = APPLE_SART1_PADDR_SHIFT,
+	.size_max = APPLE_SART1_CONFIG_SIZE_MAX,
 };
 
 static void sart2_get_entry(struct apple_sart *sart, int index, u8 *flags,
@@ -253,8 +303,8 @@ static int sart_set_entry(struct apple_sart *sart, int index, u8 flags,
 	if (paddr & ((1 << sart->ops->paddr_shift) - 1))
 		return -EINVAL;
 
-	paddr >>= sart->ops->size_shift;
-	size >>= sart->ops->paddr_shift;
+	paddr >>= sart->ops->paddr_shift;
+	size >>= sart->ops->size_shift;
 
 	if (size > sart->ops->size_max)
 		return -EINVAL;
@@ -354,6 +404,10 @@ static const struct of_device_id apple_sart_of_match[] = {
 	{
 		.compatible = "apple,t8103-sart",
 		.data = &sart_ops_v2,
+	},
+	{
+		.compatible = "apple,t8030-sart",
+		.data = &sart_ops_v1,
 	},
 	{
 		.compatible = "apple,t8015-sart",

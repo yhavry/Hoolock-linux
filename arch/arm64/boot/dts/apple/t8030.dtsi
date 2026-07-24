@@ -425,6 +425,11 @@
 			phy-names = "usb2-phy";
 			status = "disabled";
 		};
+
+		sart: iommu@27ac50000 {
+			compatible = "apple,t8030-sart";
+			reg = <0x2 0x7ac50000 0x0 0x4000>;
+		};
 	};
 };
 

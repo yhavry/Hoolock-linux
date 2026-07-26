@@ -1,0 +1,46 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/dts-v1/;
+
+#include "t8030.dtsi"
+
+/ {
+	compatible = "apple,n104", "apple,t8030", "apple,arm-platform";
+	model = "Apple iPhone 11";
+
+	chosen {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+		stdout-path = "serial0:115200n8";
+
+		framebuffer@0 {
+			compatible = "apple,simple-framebuffer", "simple-framebuffer";
+			reg = <0 0 0 0>; /* To be filled by loader */
+
+			/* Format properties will be added by loader */
+			status = "disabled";
+		};
+	};
+};
+
+&usb2phy {
+	apple,cfg0-device = <0x27373bf3>;
+	apple,cfg1-device = <0x00020c44>;
+	apple,cfg0-host = <0x27373b53>;
+	apple,cfg1-host = <0x00020c44>;
+	status = "okay";
+};
+
+&usb_dart0 {
+	status = "okay";
+};
+
+&usb_dart1 {
+	status = "okay";
+};
+
+&usb_drd {
+	dr_mode = "peripheral";
+	maximum-speed = "high-speed";
+	status = "okay";
+};

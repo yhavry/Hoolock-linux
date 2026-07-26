@@ -85,6 +85,8 @@ description: |
   Devices based on the "A13" SoC:
 
   - iPhone 11 Pro
+  - iPhone SE (2nd generation)
+  - iPhone 11
 
   Devices based on the "M1" SoC:
 
@@ -292,6 +294,7 @@ properties:
           - enum:
               - apple,d421 # iPhone 11 Pro
               - apple,d79 # iPhone SE (2nd generation)
+              - apple,n104 # iPhone 11
           - const: apple,t8030
           - const: apple,arm-platform
 

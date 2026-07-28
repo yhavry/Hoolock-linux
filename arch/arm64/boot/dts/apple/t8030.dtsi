@@ -9,6 +9,8 @@
 #include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/phy/phy.h>
 
+#include <dt-bindings/spmi/spmi.h>
+
 / {
 	#address-cells = <2>;
 	#size-cells = <2>;
@@ -139,6 +141,45 @@
 				     <AIC_IRQ 135 IRQ_TYPE_LEVEL_HIGH>,
 				     <AIC_IRQ 136 IRQ_TYPE_LEVEL_HIGH>,
 				     <AIC_IRQ 137 IRQ_TYPE_LEVEL_HIGH>;
+		};
+
+		spmi: spmi@23d180700 {
+			compatible = "apple,t8030-spmi",
+				     "apple,t8103-spmi";
+			reg = <0x2 0x3d180700 0x0 0x100>;
+			#address-cells = <2>;
+			#size-cells = <0>;
+
+			pmic@f {
+				compatible = "apple,avus-pmic",
+					     "apple,spmi-pmic";
+				reg = <0xf SPMI_USID>;
+				#address-cells = <1>;
+				#size-cells = <1>;
+
+				rtc@1100 {
+					compatible = "apple,avus-pmic-rtc",
+						     "apple,antigua-pmic-rtc";
+					reg = <0x1100 0x10>;
+					nvmem-cells = <&rtc_offset>;
+					nvmem-cell-names = "rtc_offset";
+				};
+
+				nvmem@9f00 {
+					compatible = "apple,pmic-nvmem";
+					reg = <0x9f00 0x300>;
+
+					nvmem-layout {
+						compatible = "fixed-layout";
+						#address-cells = <1>;
+						#size-cells = <1>;
+
+						rtc_offset: rtc-offset@4 {
+							reg = <0x4 0x4>;
+						};
+					};
+				};
+			};
 		};
 
 		wdt: watchdog@23d2b0000 {

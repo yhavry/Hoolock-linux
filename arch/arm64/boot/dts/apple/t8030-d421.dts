@@ -1,4 +1,9 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/*
+ * Apple D421
+ *
+ * Copyright (c) 2026, Yuriy Havrylyuk <yhavry@gmail.com>
+ */
 /dts-v1/;
 
 #include "t8030.dtsi"

@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
 /*
  * Apple T8030 USB power domains
  *
- * Copyright The Asahi Linux Contributors
+ * Copyright (c) 2026, Yuriy Havrylyuk <yhavry@gmail.com>
  */
 
 &pmgr {

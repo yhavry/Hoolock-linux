@@ -190,6 +190,37 @@
 			interrupts = <AIC_IRQ 237 IRQ_TYPE_LEVEL_HIGH>;
 		};
 
+		smc: smc@23e400000 {
+			compatible = "apple,t8030-smc", "apple,t8103-smc";
+			reg = <0x2 0x3e400000 0x0 0x4000>,
+			      <0x2 0x3fe00000 0x0 0x60000>;
+			reg-names = "smc", "sram";
+			mboxes = <&smc_mbox>;
+			status = "okay";
+
+			smc_gpio: gpio {
+				compatible = "apple,smc-gpio";
+			};
+
+			smc_reboot: reboot {
+				compatible = "apple,smc-reboot";
+			};
+		};
+
+		smc_mbox: mbox@23e408000 {
+			compatible = "apple,t8030-asc-mailbox",
+				     "apple,t8015-asc-mailbox";
+			reg = <0x2 0x3e408000 0x0 0x4000>;
+			interrupts = <AIC_IRQ 270 IRQ_TYPE_LEVEL_HIGH>,
+				     <AIC_IRQ 271 IRQ_TYPE_LEVEL_HIGH>,
+				     <AIC_IRQ 272 IRQ_TYPE_LEVEL_HIGH>,
+				     <AIC_IRQ 273 IRQ_TYPE_LEVEL_HIGH>;
+			interrupt-names = "send-empty", "send-not-empty",
+					  "recv-empty", "recv-not-empty";
+			#mbox-cells = <0>;
+			status = "okay";
+		};
+
 		uart0: serial@235200000 {
 			compatible = "apple,s5l-uart";
 			reg = <0x2 0x35200000 0x0 0x4000>;

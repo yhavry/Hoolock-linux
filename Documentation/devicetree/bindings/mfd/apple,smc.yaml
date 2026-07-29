@@ -21,6 +21,7 @@ properties:
               - apple,t6020-smc
               - apple,t8012-smc
               - apple,t8015-smc
+              - apple,t8030-smc
           - const: apple,t8103-smc
       - items:
           - enum:

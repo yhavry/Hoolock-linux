@@ -38,11 +38,17 @@ enum boot_stage {
 	BOOT_STAGE_KERNEL_STARTED	= 0x30, /* Normal OS booting */
 };
 
+struct macsmc_reboot_data {
+	bool has_phra;
+	u32 restart_key;
+};
+
 struct macsmc_reboot {
 	struct device *dev;
 	struct apple_smc *smc;
 	struct notifier_block reboot_notify;
 	bool has_phra;
+	u32 restart_key;
 	u8 sim_shutdown_flag;
 
 	union {
@@ -126,11 +132,12 @@ static int macsmc_power_off(struct sys_off_data *data)
 static int macsmc_restart(struct sys_off_data *data)
 {
 	struct macsmc_reboot *reboot = data->cb_data;
+	u32 val = reboot->restart_key;
 
-	dev_info(reboot->dev, "Issuing restart (phra)\n");
+	dev_info(reboot->dev, "Issuing restart (%p4ch)\n", &val);
 
-	if (apple_smc_write_u32_atomic(reboot->smc, SMC_KEY(MBSE), SMC_KEY(phra)) < 0) {
-		dev_err(reboot->dev, "Failed to issue MBSE = phra (restart)\n");
+	if (apple_smc_write_u32_atomic(reboot->smc, SMC_KEY(MBSE), val) < 0) {
+		dev_err(reboot->dev, "Failed to issue MBSE = %p4ch (restart)\n", &val);
 	} else {
 		mdelay(100);
 		WARN_ONCE(1, "Unable to restart system\n");
@@ -229,6 +236,7 @@ static void macsmc_power_init_error_counts(struct macsmc_reboot *reboot)
 static int macsmc_reboot_probe(struct platform_device *pdev)
 {
 	struct apple_smc *smc = dev_get_drvdata(pdev->dev.parent);
+	const struct macsmc_reboot_data *data;
 	struct macsmc_reboot *reboot;
 	int ret, i;
 
@@ -242,7 +250,12 @@ static int macsmc_reboot_probe(struct platform_device *pdev)
 	reboot->dev = &pdev->dev;
 	reboot->smc = smc;
 
-	reboot->has_phra = (bool)of_device_get_match_data(&pdev->dev);
+	data = of_device_get_match_data(&pdev->dev);
+	if (!data)
+		return -EINVAL;
+
+	reboot->has_phra = data->has_phra;
+	reboot->restart_key = data->restart_key;
 
 	if (of_property_read_bool(pdev->dev.of_node, "prc-poweroff"))
 		reboot->sim_shutdown_flag = SHUTDOWN_FLAG_PWR_OFF_SIM_BATT_INDICATOR_ON;
@@ -294,7 +307,7 @@ static int macsmc_reboot_probe(struct platform_device *pdev)
 		return dev_err_probe(&pdev->dev, ret,
 				     "Failed to register restart prepare handler\n");
 
-	if (reboot->has_phra) {
+	if (reboot->restart_key) {
 		ret = devm_register_sys_off_handler(&pdev->dev, SYS_OFF_MODE_RESTART,
 						    SYS_OFF_PRIO_HIGH, macsmc_restart, reboot);
 		if (ret)
@@ -310,9 +323,23 @@ static int macsmc_reboot_probe(struct platform_device *pdev)
 	return 0;
 }
 
+static const struct macsmc_reboot_data macsmc_reboot_default = {
+	.has_phra = true,
+	.restart_key = SMC_KEY(phra),
+};
+
+static const struct macsmc_reboot_data macsmc_reboot_t8030 = {
+	.has_phra = true,
+};
+
+static const struct macsmc_reboot_data macsmc_reboot_t8015 = {
+	.has_phra = false,
+};
+
 static const struct of_device_id macsmc_reboot_of_table[] = {
-	{ .compatible = "apple,smc-reboot", .data = (void*)true },
-	{ .compatible = "apple,t8015-smc-reboot", .data = (void*)false },
+	{ .compatible = "apple,t8030-smc-reboot", .data = &macsmc_reboot_t8030 },
+	{ .compatible = "apple,t8015-smc-reboot", .data = &macsmc_reboot_t8015 },
+	{ .compatible = "apple,smc-reboot", .data = &macsmc_reboot_default },
 	{}
 };
 MODULE_DEVICE_TABLE(of, macsmc_reboot_of_table);

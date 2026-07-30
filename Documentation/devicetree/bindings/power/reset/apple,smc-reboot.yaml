@@ -16,10 +16,13 @@ maintainers:
 
 properties:
   compatible:
-    items:
+    oneOf:
       - enum:
           - apple,smc-reboot
           - apple,t8015-smc-reboot
+      - items:
+          - const: apple,t8030-smc-reboot
+          - const: apple,smc-reboot
 
   nvmem-cells:
     items:

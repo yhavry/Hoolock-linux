@@ -1,0 +1,153 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/*
+ * Apple T8030 "A13" common device tree
+ *
+ * Copyright (c) 2026, Yuriy Havrylyuk <yhavry@gmail.com>
+ */
+
+&smc_hwmon {
+	current-CHQi {
+		apple,key-id = "CHQi";
+		label = "CHQi";
+	};
+
+	current-IQ0u {
+		apple,key-id = "IQ0u";
+		label = "IQ0u";
+	};
+
+	power-CHQw {
+		apple,key-id = "CHQw";
+		label = "CHQw";
+	};
+
+	temperature-TG0A {
+		apple,key-id = "TG0A";
+		label = "TG0A";
+	};
+
+	temperature-TG0B {
+		apple,key-id = "TG0B";
+		label = "TG0B";
+	};
+
+	temperature-TG0C {
+		apple,key-id = "TG0C";
+		label = "TG0C";
+	};
+
+	temperature-TG0H {
+		apple,key-id = "TG0H";
+		label = "TG0H";
+	};
+
+	temperature-TG0V {
+		apple,key-id = "TG0V";
+		label = "TG0V";
+	};
+
+	temperature-TP0Z {
+		apple,key-id = "TP0Z";
+		label = "TP0Z";
+	};
+
+	temperature-TP1d {
+		apple,key-id = "TP1d";
+		label = "TP1d";
+	};
+
+	temperature-TP2d {
+		apple,key-id = "TP2d";
+		label = "TP2d";
+	};
+
+	temperature-TP3d {
+		apple,key-id = "TP3d";
+		label = "TP3d";
+	};
+
+	temperature-TP4d {
+		apple,key-id = "TP4d";
+		label = "TP4d";
+	};
+
+	temperature-TP5d {
+		apple,key-id = "TP5d";
+		label = "TP5d";
+	};
+
+	temperature-TQ0d {
+		apple,key-id = "TQ0d";
+		label = "TQ0d";
+	};
+
+	temperature-TQ0j {
+		apple,key-id = "TQ0j";
+		label = "TQ0j";
+	};
+
+	temperature-TV0s {
+		apple,key-id = "TV0s";
+		label = "TV0s";
+	};
+
+	temperature-TV1s {
+		apple,key-id = "TV1s";
+		label = "TV1s";
+	};
+
+	temperature-TV2s {
+		apple,key-id = "TV2s";
+		label = "TV2s";
+	};
+
+	temperature-TV3s {
+		apple,key-id = "TV3s";
+		label = "TV3s";
+	};
+
+	temperature-TV4s {
+		apple,key-id = "TV4s";
+		label = "TV4s";
+	};
+
+	temperature-TV5s {
+		apple,key-id = "TV5s";
+		label = "TV5s";
+	};
+
+	voltage-CHQv {
+		apple,key-id = "CHQv";
+		label = "CHQv";
+	};
+
+	voltage-VP0B {
+		apple,key-id = "VP0B";
+		label = "VP0B";
+	};
+
+	voltage-VP0u {
+		apple,key-id = "VP0u";
+		label = "VP0u";
+	};
+
+	voltage-VQ0l {
+		apple,key-id = "VQ0l";
+		label = "VQ0l";
+	};
+
+	voltage-VQ0u {
+		apple,key-id = "VQ0u";
+		label = "VQ0u";
+	};
+
+	voltage-VQ1u {
+		apple,key-id = "VQ1u";
+		label = "VQ1u";
+	};
+
+	voltage-VQDD {
+		apple,key-id = "VQDD";
+		label = "VQDD";
+	};
+};

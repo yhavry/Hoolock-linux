@@ -357,6 +357,10 @@
 				nvmem-cells = <&rtc_offset>;
 				nvmem-cell-names = "rtc_offset";
 			};
+
+			smc_hwmon: hwmon {
+				compatible = "apple,smc-hwmon";
+			};
 		};
 
 		smc_mbox: mbox@23e408000 {

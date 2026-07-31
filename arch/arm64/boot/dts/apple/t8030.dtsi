@@ -42,6 +42,8 @@
 			reg = <0x0 0x0>;
 			enable-method = "spin-table";
 			cpu-release-addr = <0 0>;
+			operating-points-v2 = <&t8030_ecpu_opp>;
+			performance-domains = <&cpufreq_e>;
 		};
 
 		cpu@1 {
@@ -50,6 +52,8 @@
 			reg = <0x0 0x1>;
 			enable-method = "spin-table";
 			cpu-release-addr = <0 0>;
+			operating-points-v2 = <&t8030_ecpu_opp>;
+			performance-domains = <&cpufreq_e>;
 		};
 
 		cpu@2 {
@@ -58,6 +62,8 @@
 			reg = <0x0 0x2>;
 			enable-method = "spin-table";
 			cpu-release-addr = <0 0>;
+			operating-points-v2 = <&t8030_ecpu_opp>;
+			performance-domains = <&cpufreq_e>;
 		};
 
 		cpu@3 {
@@ -66,6 +72,8 @@
 			reg = <0x0 0x3>;
 			enable-method = "spin-table";
 			cpu-release-addr = <0 0>;
+			operating-points-v2 = <&t8030_ecpu_opp>;
+			performance-domains = <&cpufreq_e>;
 		};
 
 		cpu@10100 {
@@ -74,6 +82,8 @@
 			reg = <0x0 0x10100>;
 			enable-method = "spin-table";
 			cpu-release-addr = <0 0>;
+			operating-points-v2 = <&t8030_pcpu_opp>;
+			performance-domains = <&cpufreq_p>;
 		};
 
 		cpu@10101 {
@@ -82,7 +92,100 @@
 			reg = <0x0 0x10101>;
 			enable-method = "spin-table";
 			cpu-release-addr = <0 0>;
+			operating-points-v2 = <&t8030_pcpu_opp>;
+			performance-domains = <&cpufreq_p>;
 		};
+	};
+
+	t8030_ecpu_opp: opp-table-1 {
+		compatible = "operating-points-v2";
+		opp-shared;
+
+		opp01 {
+			opp-hz = /bits/ 64 <576000000>;
+			opp-level = <1>;
+			clock-latency-ns = <7500>;
+		};
+
+		opp02 {
+			opp-hz = /bits/ 64 <864000000>;
+			opp-level = <2>;
+			clock-latency-ns = <22000>;
+		};
+
+		opp03 {
+			opp-hz = /bits/ 64 <1152000000>;
+			opp-level = <3>;
+			clock-latency-ns = <27000>;
+		};
+
+		opp04 {
+			opp-hz = /bits/ 64 <1440000000>;
+			opp-level = <4>;
+			clock-latency-ns = <33000>;
+		};
+
+		opp05 {
+			opp-hz = /bits/ 64 <1728000000>;
+			opp-level = <5>;
+			clock-latency-ns = <50000>;
+		};
+	};
+
+	t8030_pcpu_opp: opp-table-5 {
+		compatible = "operating-points-v2";
+		opp-shared;
+
+		opp01 {
+			opp-hz = /bits/ 64 <540000000>;
+			opp-level = <1>;
+			clock-latency-ns = <8000>;
+		};
+
+		opp02 {
+			opp-hz = /bits/ 64 <912000000>;
+			opp-level = <2>;
+			clock-latency-ns = <19000>;
+		};
+
+		opp03 {
+			opp-hz = /bits/ 64 <1296000000>;
+			opp-level = <3>;
+			clock-latency-ns = <21000>;
+		};
+
+		opp04 {
+			opp-hz = /bits/ 64 <1860000000>;
+			opp-level = <4>;
+			clock-latency-ns = <23000>;
+		};
+
+		opp05 {
+			opp-hz = /bits/ 64 <2184000000>;
+			opp-level = <5>;
+			clock-latency-ns = <24000>;
+		};
+
+		opp06 {
+			opp-hz = /bits/ 64 <2400000000>;
+			opp-level = <6>;
+			clock-latency-ns = <29000>;
+		};
+
+#if 0
+		/* Not available until T8030 high-performance P-states are supported */
+		opp07 {
+			opp-hz = /bits/ 64 <2592000000>;
+			opp-level = <7>;
+			clock-latency-ns = <31000>;
+		};
+
+		opp08 {
+			opp-hz = /bits/ 64 <2664000000>;
+			opp-level = <8>;
+			clock-latency-ns = <34000>;
+		};
+#endif
 	};
 
 	timer {
@@ -209,6 +312,22 @@
 			reg = <0x2 0x3d2b0000 0x0 0x4000>;
 			clocks = <&clkref>;
 			interrupts = <AIC_IRQ 237 IRQ_TYPE_LEVEL_HIGH>;
+		};
+
+		cpufreq_e: performance-controller@210e20000 {
+			compatible = "apple,t8030-cluster-cpufreq",
+				     "apple,t8103-cluster-cpufreq",
+				     "apple,cluster-cpufreq";
+			reg = <0x2 0x10e20000 0x0 0x1000>;
+			#performance-domain-cells = <0>;
+		};
+
+		cpufreq_p: performance-controller@211e20000 {
+			compatible = "apple,t8030-cluster-cpufreq",
+				     "apple,t8103-cluster-cpufreq",
+				     "apple,cluster-cpufreq";
+			reg = <0x2 0x11e20000 0x0 0x1000>;
+			#performance-domain-cells = <0>;
 		};
 
 		smc: smc@23e400000 {

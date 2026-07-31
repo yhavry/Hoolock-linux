@@ -62,6 +62,7 @@
 
 struct apple_soc_cpufreq_info {
 	bool has_ps2;
+	bool no_fast_switch;
 	u64 max_pstate;
 	u64 cur_pstate_mask;
 	u64 cur_pstate_shift;
@@ -95,6 +96,16 @@ static const struct apple_soc_cpufreq_info soc_t8103_info = {
 	.ps1_shift = APPLE_DVFS_CMD_PS1_SHIFT,
 };
 
+static const struct apple_soc_cpufreq_info soc_t8030_info = {
+	.has_ps2 = true,
+	.no_fast_switch = true,
+	.max_pstate = 6,
+	.cur_pstate_mask = APPLE_DVFS_STATUS_CUR_PS_T8103,
+	.cur_pstate_shift = APPLE_DVFS_STATUS_CUR_PS_SHIFT_T8103,
+	.ps1_mask = APPLE_DVFS_CMD_PS1,
+	.ps1_shift = APPLE_DVFS_CMD_PS1_SHIFT,
+};
+
 static const struct apple_soc_cpufreq_info soc_t8112_info = {
 	.has_ps2 = false,
 	.max_pstate = 31,
@@ -116,6 +127,10 @@ static const struct of_device_id apple_soc_cpufreq_of_match[] __maybe_unused = {
 	{
 		.compatible = "apple,s5l8960x-cluster-cpufreq",
 		.data = &soc_s5l8960x_info,
+	},
+	{
+		.compatible = "apple,t8030-cluster-cpufreq",
+		.data = &soc_t8030_info,
 	},
 	{
 		.compatible = "apple,t8103-cluster-cpufreq",
@@ -311,7 +326,7 @@ static int apple_soc_cpufreq_init(struct cpufreq_policy *policy)
 
 	policy->cpuinfo.transition_latency = transition_latency;
 	policy->dvfs_possible_from_any_cpu = true;
-	policy->fast_switch_possible = true;
+	policy->fast_switch_possible = !info->no_fast_switch;
 	policy->suspend_freq = freq_table[0].frequency;
 
 	return 0;

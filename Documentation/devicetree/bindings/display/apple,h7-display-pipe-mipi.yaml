@@ -14,14 +14,24 @@ description:
 
 allOf:
   - $ref: dsi-controller.yaml#
+  - if:
+      properties:
+        compatible:
+          contains:
+            const: apple,h7-display-pipe-mipi
+    then:
+      required:
+        - ports
 
 properties:
   compatible:
-    items:
-      - enum:
-          - apple,t8112-display-pipe-mipi
-          - apple,t8103-display-pipe-mipi
-      - const: apple,h7-display-pipe-mipi
+    oneOf:
+      - const: apple,t8030-display-pipe-mipi
+      - items:
+          - enum:
+              - apple,t8112-display-pipe-mipi
+              - apple,t8103-display-pipe-mipi
+          - const: apple,h7-display-pipe-mipi
 
   reg:
     maxItems: 1
@@ -48,7 +58,6 @@ properties:
 required:
   - compatible
   - reg
-  - ports
 
 unevaluatedProperties: false
 

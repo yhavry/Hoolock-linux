@@ -177,6 +177,10 @@ static int adp_dsi_host_attach(struct mipi_dsi_host *host,
 	struct drm_bridge *next;
 	int ret;
 
+	if (of_device_is_compatible(host->dev->of_node,
+				    "apple,t8030-display-pipe-mipi"))
+		return 0;
+
 	next = devm_drm_of_get_bridge(adp->dsi.dev, adp->dsi.dev->of_node, 1, 0);
 	if (IS_ERR(next))
 		return PTR_ERR(next);
@@ -199,6 +203,10 @@ static int adp_dsi_host_detach(struct mipi_dsi_host *host,
 			       struct mipi_dsi_device *dev)
 {
 	struct adp_mipi_drv_private *adp = mipi_to_adp(host);
+
+	if (of_device_is_compatible(host->dev->of_node,
+				    "apple,t8030-display-pipe-mipi"))
+		return 0;
 
 	component_del(host->dev, &adp_dsi_component_ops);
 	drm_bridge_remove(&adp->bridge);
@@ -257,6 +265,7 @@ static void adp_mipi_remove(struct platform_device *pdev)
 }
 
 static const struct of_device_id adp_mipi_of_match[] = {
+	{ .compatible = "apple,t8030-display-pipe-mipi", },
 	{ .compatible = "apple,h7-display-pipe-mipi", },
 	{ },
 };

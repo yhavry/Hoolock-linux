@@ -29,6 +29,22 @@
 	};
 };
 
+&{/soc} {
+	dsi@230400000 {
+		compatible = "apple,t8030-display-pipe-mipi";
+		reg = <0x2 0x30400000 0x0 0xc0000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		panel@0 {
+			compatible = "apple,d421-summit", "apple,summit";
+			reg = <0>;
+			max-brightness = <2047>;
+			default-brightness = <598>;
+		};
+	};
+};
+
 &usb2phy {
 	apple,cfg0-device = <0x27373bf3>;
 	apple,cfg1-device = <0x00020c44>;

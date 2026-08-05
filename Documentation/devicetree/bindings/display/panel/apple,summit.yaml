@@ -10,18 +10,30 @@ maintainers:
   - Sasha Finkelstein <k@chaosmail.tech>
 
 description:
-  An OLED panel used as a touchbar on certain Apple laptops.
+  An OLED panel used as a touchbar on certain Apple laptops and as a display
+  on certain Apple phones.
   Contains a backlight device, which controls brightness of the panel itself.
   The backlight common properties are included for this reason
 
 allOf:
   - $ref: panel-common.yaml#
   - $ref: /schemas/leds/backlight/common.yaml#
+  - if:
+      properties:
+        compatible:
+          contains:
+            enum:
+              - apple,j293-summit
+              - apple,j493-summit
+    then:
+      required:
+        - port
 
 properties:
   compatible:
     items:
       - enum:
+          - apple,d421-summit
           - apple,j293-summit
           - apple,j493-summit
       - const: apple,summit
@@ -33,7 +45,6 @@ required:
   - compatible
   - reg
   - max-brightness
-  - port
 
 unevaluatedProperties: false
 

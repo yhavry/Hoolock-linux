@@ -7,8 +7,10 @@
  * Copyright (c) 2026, Yuriy Havrylyuk <yhavry@gmail.com>
  */
 
+#include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/interrupt-controller/apple-aic.h>
 #include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/pinctrl/apple.h>
 #include <dt-bindings/phy/phy.h>
 
 #include <dt-bindings/spmi/spmi.h>
@@ -228,6 +230,16 @@
 				label = "apcie";
 			};
 
+			ps_apcie_gp: power-controller@80380 {
+				compatible = "apple,t8030-pmgr-pwrstate",
+					     "apple,t8103-pmgr-pwrstate";
+				reg = <0x80380 4>;
+				#power-domain-cells = <0>;
+				#reset-cells = <0>;
+				label = "apcie_gp";
+				power-domains = <&ps_apcie>;
+			};
+
 			ps_ans2: power-controller@80388 {
 				compatible = "apple,t8030-pmgr-pwrstate",
 					     "apple,t8103-pmgr-pwrstate";
@@ -274,6 +286,10 @@
 				     <AIC_IRQ 135 IRQ_TYPE_LEVEL_HIGH>,
 				     <AIC_IRQ 136 IRQ_TYPE_LEVEL_HIGH>,
 				     <AIC_IRQ 137 IRQ_TYPE_LEVEL_HIGH>;
+
+			pcie_pins: pcie-pins {
+				pinmux = <APPLE_PINMUX(33, 1)>;
+			};
 		};
 
 		spmi: spmi@23d180700 {
@@ -486,6 +502,75 @@
 			power-domains = <&ps_ans2>, <&ps_apcie_st>;
 			power-domain-names = "ans", "apcie0";
 			resets = <&ps_ans2>;
+		};
+
+		pcie_dart2: iommu@603008000 {
+			compatible = "apple,t8103-dart";
+			reg = <0x6 0x03008000 0x0 0x4000>;
+			interrupts = <AIC_IRQ 539 IRQ_TYPE_LEVEL_HIGH>;
+			#iommu-cells = <1>;
+			power-domains = <&ps_apcie_gp>;
+			status = "disabled";
+		};
+
+		pcie0: pcie@610000000 {
+			compatible = "apple,t8030-pcie", "apple,pcie";
+			device_type = "pci";
+
+			reg = <0x6 0x10000000 0x0 0x1000000>,
+			      <0x6 0x00000000 0x0 0x4000>,
+			      <0x6 0x01000000 0x0 0x8000>,
+			      <0x6 0x02000000 0x0 0x8000>,
+			      <0x6 0x03000000 0x0 0x8000>,
+			      <0x6 0x04000000 0x0 0x8000>,
+			      <0x6 0x00090000 0x0 0x4000>;
+			reg-names = "config", "rc", "port0", "port1", "port2",
+				    "port3", "phy2";
+
+			interrupts = <AIC_IRQ 532 IRQ_TYPE_LEVEL_HIGH>,
+				     <AIC_IRQ 535 IRQ_TYPE_LEVEL_HIGH>,
+				     <AIC_IRQ 538 IRQ_TYPE_LEVEL_HIGH>,
+				     <AIC_IRQ 541 IRQ_TYPE_LEVEL_HIGH>;
+
+			msi-controller;
+			msi-parent = <&pcie0>;
+			msi-ranges = <&aic AIC_IRQ 544 IRQ_TYPE_EDGE_RISING 32>;
+
+			iommu-map = <0x100 &pcie_dart2 0 2>;
+			iommu-map-mask = <0xffff>;
+
+			bus-range = <0 8>;
+			#address-cells = <3>;
+			#size-cells = <2>;
+			ranges = <0x43000000 0x6 0x20000000
+				  0x6 0x20000000 0x0 0x20000000>,
+				 <0x02000000 0x0 0x40000000
+				  0x6 0x40000000 0x0 0x40000000>;
+
+			power-domains = <&ps_apcie_gp>;
+			pinctrl-0 = <&pcie_pins>;
+			pinctrl-names = "default";
+			status = "disabled";
+
+			port02: pci@2,0 {
+				device_type = "pci";
+				reg = <0x1000 0x0 0x0 0x0 0x0>;
+				reset-gpios = <&pinctrl_ap 35 GPIO_ACTIVE_LOW>;
+				max-link-speed = <2>;
+
+				#address-cells = <3>;
+				#size-cells = <2>;
+				ranges;
+
+				interrupt-controller;
+				#interrupt-cells = <1>;
+
+				interrupt-map-mask = <0 0 0 7>;
+				interrupt-map = <0 0 0 1 &port02 0 0 0 0>,
+						<0 0 0 2 &port02 0 0 0 1>,
+						<0 0 0 3 &port02 0 0 0 2>,
+						<0 0 0 4 &port02 0 0 0 3>;
+			};
 		};
 	};
 };

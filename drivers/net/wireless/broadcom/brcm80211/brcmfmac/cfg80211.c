@@ -5766,6 +5766,8 @@ static int brcmf_cfg80211_get_channel(struct wiphy *wiphy,
 
 	freq = ieee80211_channel_to_frequency(ch.control_ch_num, band);
 	chandef->chan = ieee80211_get_channel(wiphy, freq);
+	if (!chandef->chan)
+		return -ENODATA;
 	chandef->width = width;
 	chandef->center_freq1 = ieee80211_channel_to_frequency(ch.chnum, band);
 	chandef->center_freq2 = 0;

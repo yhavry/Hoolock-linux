@@ -474,6 +474,19 @@
 			reg = <0x2 0x7ac50000 0x0 0x4000>;
 			power-domains = <&ps_ans2>;
 		};
+
+		nvme@27acc0000 {
+			compatible = "apple,t8030-nvme-ans2";
+			reg = <0x2 0x7acc0000 0x0 0x60000>,
+			      <0x2 0x77400000 0x0 0x4000>;
+			reg-names = "nvme", "ans";
+			interrupts = <AIC_IRQ 422 IRQ_TYPE_LEVEL_HIGH>;
+			mboxes = <&ans_mbox>;
+			apple,sart = <&sart>;
+			power-domains = <&ps_ans2>, <&ps_apcie_st>;
+			power-domain-names = "ans", "apcie0";
+			resets = <&ps_ans2>;
+		};
 	};
 };
 

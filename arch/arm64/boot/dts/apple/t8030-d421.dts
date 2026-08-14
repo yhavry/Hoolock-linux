@@ -13,6 +13,11 @@
 	compatible = "apple,d421", "apple,t8030", "apple,arm-platform";
 	model = "Apple iPhone 11 Pro";
 
+	aliases {
+		bluetooth0 = &bluetooth0;
+		wifi0 = &wifi0;
+	};
+
 	chosen {
 		#address-cells = <2>;
 		#size-cells = <2>;
@@ -65,4 +70,33 @@
 	dr_mode = "peripheral";
 	maximum-speed = "high-speed";
 	status = "okay";
+};
+
+&pcie_dart2 {
+	status = "okay";
+};
+
+&pcie0 {
+	status = "okay";
+};
+
+&port02 {
+	bus-range = <1 1>;
+
+	wifi0: wifi@0,0 {
+		compatible = "pci14e4,4425";
+		reg = <0x10000 0x0 0x0 0x0 0x0>;
+		/* To be filled by the loader */
+		local-mac-address = [00 00 00 00 00 00];
+		apple,antenna-sku = "XX";
+		brcm,board-type = "apple,d421";
+	};
+
+	bluetooth0: bluetooth@0,1 {
+		compatible = "pci14e4,5f69";
+		reg = <0x10100 0x0 0x0 0x0 0x0>;
+		/* To be filled by the loader */
+		local-bd-address = [00 00 00 00 00 00];
+		brcm,board-type = "apple,d421";
+	};
 };

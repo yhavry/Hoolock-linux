@@ -35,14 +35,16 @@ static int apple_pmic_bl_update_status(struct backlight_device *bl)
 	u8 cmd[2];
 
 	switch (data->type) {
-		case PMIC_TYPE_ANYA:
-			cmd[0] = (brightness >> 3) & 0xff;
-			cmd[1] = brightness & 0x7;
-			break;
-		case PMIC_TYPE_ARIA:
-			cmd[0] = brightness & 0xff;
-			cmd[1] = (brightness >> 8) & 0x7;
-			break;
+	case PMIC_TYPE_ANYA:
+		cmd[0] = (brightness >> 3) & 0xff;
+		cmd[1] = brightness & 0x7;
+		break;
+	case PMIC_TYPE_ARIA:
+		cmd[0] = brightness & 0xff;
+		cmd[1] = (brightness >> 8) & 0x7;
+		break;
+	default:
+		return -EINVAL;
 	}
 
 	return regmap_bulk_write(data->regmap, data->base, cmd, 2);
@@ -60,10 +62,12 @@ static int apple_pmic_bl_get_brightness(struct backlight_device *bl)
 		return ret;
 
 	switch (data->type) {
-		case PMIC_TYPE_ANYA:
-			return (cmd[0] << 3) | (cmd[1] & 7);
-		case PMIC_TYPE_ARIA:
-			return ((cmd[1] & 7) << 8) | (cmd[0] & 0xff);
+	case PMIC_TYPE_ANYA:
+		return (cmd[0] << 3) | (cmd[1] & 7);
+	case PMIC_TYPE_ARIA:
+		return ((cmd[1] & 7) << 8) | (cmd[0] & 0xff);
+	default:
+		return -EINVAL;
 	}
 }
 
@@ -90,7 +94,7 @@ static int apple_pmic_bl_probe(struct platform_device *dev)
 	if (of_property_read_u32(dev->dev.of_node, "reg", &data->base))
 		return -ENODEV;
 
-	data->type = (enum apple_pmic_type)of_device_get_match_data(&dev->dev);
+	data->type = (uintptr_t)of_device_get_match_data(&dev->dev);
 
 	memset(&props, 0, sizeof(struct backlight_properties));
 	props.type = BACKLIGHT_RAW;
@@ -98,7 +102,7 @@ static int apple_pmic_bl_probe(struct platform_device *dev)
 	props.scale = BACKLIGHT_SCALE_LINEAR;
 
 	bl = devm_backlight_device_register(&dev->dev, dev->name, &dev->dev,
-					data, &apple_pmic_bl_ops, &props);
+					    data, &apple_pmic_bl_ops, &props);
 	if (IS_ERR(bl))
 		return PTR_ERR(bl);
 
@@ -110,8 +114,8 @@ static int apple_pmic_bl_probe(struct platform_device *dev)
 }
 
 static const struct of_device_id apple_pmic_bl_of_match[] = {
-	{ .compatible = "apple,anya-pmic-bl", .data = (void*)PMIC_TYPE_ANYA },
-	{ .compatible = "apple,aria-pmic-bl", .data = (void*)PMIC_TYPE_ARIA },
+	{ .compatible = "apple,anya-pmic-bl", .data = (void *)PMIC_TYPE_ANYA },
+	{ .compatible = "apple,aria-pmic-bl", .data = (void *)PMIC_TYPE_ARIA },
 	{},
 };
 
